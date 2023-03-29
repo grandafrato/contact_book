@@ -1,4 +1,5 @@
-use contact_book::{Contact, ContactBook, ContactBookError};
+use contact_book::book::{ContactBook, ContactBookError};
+use contact_book::Contact;
 
 #[test]
 fn contact_book() -> Result<(), ContactBookError> {
