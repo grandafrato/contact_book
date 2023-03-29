@@ -1,4 +1,4 @@
-/* Workflow for contact_book:
+/* Workflow for ContactBook:
  *   1. There is a single global contacts book.
  *   2. A contact can be added to the contact book, creating a unique identifier
  *      for the contact in the contact book.
