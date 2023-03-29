@@ -20,7 +20,7 @@ impl Contact {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub struct ContactBookEntryId(Uuid);
 
 impl ContactBookEntryId {
@@ -53,15 +53,15 @@ impl ContactBook {
 
     pub fn add_contact(mut self, contact: Contact) -> (ContactBookEntryId, Self) {
         let id = ContactBookEntryId::new();
-        self.contacts.insert(id, contact);
+        self.contacts.insert(id.clone(), contact);
 
         (id, self)
     }
 
-    pub fn list_contacts(&self) -> Vec<(ContactBookEntryId, &Contact)> {
+    pub fn list_contacts(&self) -> Vec<(&ContactBookEntryId, &Contact)> {
         self.contacts
             .iter()
-            .map(|(id, contact)| (*id, contact))
+            .map(|(id, contact)| (id, contact))
             .collect()
     }
 
@@ -81,7 +81,7 @@ impl ContactBook {
     ) -> Result<Self, ContactBookError> {
         match self.contacts.get_mut(contact_id) {
             Some(_contact) => {
-                self.favorites.insert(*contact_id);
+                self.favorites.insert(contact_id.clone());
                 return Ok(self);
             }
             None => Err(ContactBookError::CannotFavoriteNonexistantContact),
@@ -193,7 +193,7 @@ mod tests {
 
         let contacts = contacts.add_favorite_contact(&id).unwrap();
 
-        assert_eq!(contacts.get_favorite_contact_ids(), vec![id]);
+        assert_eq!(contacts.get_favorite_contact_ids(), vec![id.clone()]);
 
         let contacts = contacts.remove_contact(id).unwrap();
 

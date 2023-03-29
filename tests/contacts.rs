@@ -7,7 +7,7 @@ fn contact_book() -> Result<(), ContactBookError> {
 
     let (contact_id, contact_book) = contact_book.add_contact(contact.clone());
 
-    assert_eq!(contact_book.list_contacts(), vec![(contact_id, &contact)]);
+    assert_eq!(contact_book.list_contacts(), vec![(&contact_id, &contact)]);
 
     let queried_contact = contact_book.get_contact(&contact_id)?;
 
