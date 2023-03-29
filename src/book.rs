@@ -229,7 +229,7 @@ mod tests {
 
     #[test]
     fn removing_a_nonfavorited_contact_from_favorites_returns_an_error() {
-        let (id, contacts) = ContactBook::new().add_contact(Contact::new("Foo Bar"));
+        let (id, contacts) = ContactBook::new().add_contact(Contact::new("Foo Bar").unwrap());
 
         let contacts = contacts.remove_favorite_contact(&id);
 
@@ -251,7 +251,7 @@ mod tests {
 
     #[test]
     fn removing_a_contact_from_the_book_removes_the_contact_id_from_the_list_of_favorites() {
-        let (id, contacts) = ContactBook::new().add_contact(Contact::new("Foo Bar"));
+        let (id, contacts) = ContactBook::new().add_contact(Contact::new("Foo Bar").unwrap());
 
         let contacts = contacts.add_favorite_contact(&id).unwrap();
 

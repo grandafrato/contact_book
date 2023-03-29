@@ -4,7 +4,7 @@ use std::error::Error;
 
 #[test]
 fn contact_book() -> Result<(), Box<dyn Error>> {
-    let contact = Contact::new("Foo Bar");
+    let contact = Contact::new("Foo Bar")?;
     let contact_book = ContactBook::new();
 
     let (contact_id, contact_book) = contact_book.add_contact(contact.clone());
