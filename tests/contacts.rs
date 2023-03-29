@@ -1,5 +1,5 @@
 use contact_book::book::{ContactBook, ContactBookError};
-use contact_book::{Contact, ContactError, SocialMediaWebsite};
+use contact_book::contact::{Contact, ContactError, SocialMediaWebsite};
 use std::error::Error;
 
 #[test]

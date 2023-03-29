@@ -14,7 +14,7 @@ use std::error::Error;
 use std::fmt::Display;
 use uuid::Uuid;
 
-use crate::Contact;
+use crate::contact::Contact;
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub struct ContactBookEntryId(Uuid);
@@ -184,7 +184,7 @@ impl ContactBook {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Contact;
+    use crate::contact::Contact;
 
     #[test]
     fn no_two_new_contact_book_entry_ids_are_identical() {
