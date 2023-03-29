@@ -10,6 +10,8 @@
  *      removes all references to the contact within the contact book.
  */
 use std::collections::{HashMap, HashSet};
+use std::error::Error;
+use std::fmt::Display;
 use uuid::Uuid;
 
 use crate::Contact;
@@ -78,6 +80,24 @@ pub enum ContactBookError {
     CannotFavoriteNonexistantContact,
     ContactWasNotAFavorite,
     CannotRemoveNonexistantContact,
+}
+
+impl Error for ContactBookError {}
+impl Display for ContactBookError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::NoSuchContactInBook => write!(f, "There is no such contact in the contact book."),
+            Self::CannotFavoriteNonexistantContact => {
+                write!(f, "Cannot favorite a nonexistant contact.")
+            }
+            Self::ContactWasNotAFavorite => {
+                write!(f, "The given contact was not in the favorites.")
+            }
+            Self::CannotRemoveNonexistantContact => {
+                write!(f, "Cannot remove a nonexistant contact.")
+            }
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]

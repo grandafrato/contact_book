@@ -1,8 +1,9 @@
 use contact_book::book::{ContactBook, ContactBookError};
-use contact_book::Contact;
+use contact_book::{Contact, ContactError};
+use std::error::Error;
 
 #[test]
-fn contact_book() -> Result<(), ContactBookError> {
+fn contact_book() -> Result<(), Box<dyn Error>> {
     let contact = Contact::new("Foo Bar");
     let contact_book = ContactBook::new();
 
@@ -29,5 +30,11 @@ fn contact_book() -> Result<(), ContactBookError> {
 
     assert_eq!(queried_contact, Err(ContactBookError::NoSuchContactInBook));
 
+    Ok(())
+}
+
+#[test]
+fn contact() -> Result<(), ContactError> {
+    todo!();
     Ok(())
 }

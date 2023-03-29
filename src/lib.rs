@@ -1,5 +1,8 @@
 pub mod book;
 
+#[derive(Debug)]
+pub struct ContactError;
+
 #[derive(PartialEq, Debug, Clone)]
 pub struct Contact;
 
