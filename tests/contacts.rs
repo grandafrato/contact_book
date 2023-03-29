@@ -5,7 +5,7 @@ fn contact_book() -> Result<(), ContactBookError> {
     let contact = Contact::new("Foo Bar");
     let contact_book = ContactBook::new();
 
-    let (contact_id, contact_book) = contact_book.add_contact(contact.clone())?;
+    let (contact_id, contact_book) = contact_book.add_contact(contact.clone());
 
     assert_eq!(contact_book.list_contacts(), vec![(contact_id, &contact)]);
 
