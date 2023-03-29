@@ -8,7 +8,7 @@
  *   5. A contact that was favorited can be unfavorited.
  *   6. A contact can be removed from the contact book by its unique id.
  */
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use uuid::Uuid;
 
 #[derive(PartialEq, Debug, Clone)]
@@ -30,27 +30,6 @@ impl ContactBookEntryId {
 }
 
 #[derive(Debug, PartialEq)]
-enum FavoritedContactEntry {
-    Favorited,
-    NotFavorited,
-}
-
-#[derive(PartialEq, Debug)]
-pub struct ContactBookEntry {
-    contact: Contact,
-    favorited: FavoritedContactEntry,
-}
-
-impl ContactBookEntry {
-    pub fn new(contact: Contact) -> Self {
-        Self {
-            contact,
-            favorited: FavoritedContactEntry::NotFavorited,
-        }
-    }
-}
-
-#[derive(Debug, PartialEq)]
 pub enum ContactBookError {
     NoSuchContactInBook,
     CannotFavoriteNonexistantContact,
@@ -59,25 +38,30 @@ pub enum ContactBookError {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct ContactBook(HashMap<ContactBookEntryId, ContactBookEntry>);
+pub struct ContactBook {
+    contacts: HashMap<ContactBookEntryId, Contact>,
+    favorites: HashSet<ContactBookEntryId>,
+}
 
 impl ContactBook {
     pub fn new() -> Self {
-        ContactBook(HashMap::new())
+        ContactBook {
+            contacts: HashMap::new(),
+            favorites: HashSet::new(),
+        }
     }
 
     pub fn add_contact(mut self, contact: Contact) -> (ContactBookEntryId, Self) {
-        let new_contact_entry = ContactBookEntry::new(contact);
         let id = ContactBookEntryId::new();
-        self.0.insert(id, new_contact_entry);
+        self.contacts.insert(id, contact);
 
         (id, self)
     }
 
     pub fn list_contacts(&self) -> Vec<(ContactBookEntryId, &Contact)> {
-        self.0
+        self.contacts
             .iter()
-            .map(|(id, ContactBookEntry { contact, .. })| (*id, contact))
+            .map(|(id, contact)| (*id, contact))
             .collect()
     }
 
@@ -85,8 +69,8 @@ impl ContactBook {
         &self,
         contact_id: &ContactBookEntryId,
     ) -> Result<&Contact, ContactBookError> {
-        match self.0.get(contact_id) {
-            Some(contact_entry) => Ok(&contact_entry.contact),
+        match self.contacts.get(contact_id) {
+            Some(contact) => Ok(&contact),
             None => Err(ContactBookError::NoSuchContactInBook),
         }
     }
@@ -95,9 +79,9 @@ impl ContactBook {
         mut self,
         contact_id: &ContactBookEntryId,
     ) -> Result<Self, ContactBookError> {
-        match self.0.get_mut(contact_id) {
-            Some(contact_entry) => {
-                contact_entry.favorited = FavoritedContactEntry::Favorited;
+        match self.contacts.get_mut(contact_id) {
+            Some(_contact) => {
+                self.favorites.insert(*contact_id);
                 return Ok(self);
             }
             None => Err(ContactBookError::CannotFavoriteNonexistantContact),
@@ -108,30 +92,28 @@ impl ContactBook {
         mut self,
         contact_id: &ContactBookEntryId,
     ) -> Result<Self, ContactBookError> {
-        match self.0.get_mut(contact_id) {
-            Some(contact_entry) => {
-                contact_entry.favorited = FavoritedContactEntry::NotFavorited;
-                return Ok(self);
+        match self.contacts.get_mut(contact_id) {
+            Some(_contact) => {
+                if self.favorites.remove(contact_id) {
+                    Ok(self)
+                } else {
+                    Err(ContactBookError::ContactWasNotAFavorite)
+                }
             }
-            None => Err(ContactBookError::ContactWasNotAFavorite),
+            None => Err(ContactBookError::NoSuchContactInBook),
         }
     }
 
     pub fn get_favorite_contact_ids(&self) -> Vec<ContactBookEntryId> {
-        self.0
-            .iter()
-            .filter_map(|(id, ContactBookEntry { favorited, .. })| match favorited {
-                FavoritedContactEntry::Favorited => Some(*id),
-                FavoritedContactEntry::NotFavorited => None,
-            })
-            .collect()
+        self.favorites.iter().cloned().collect()
     }
 
     pub fn remove_contact(
         mut self,
-        contact_id: &ContactBookEntryId,
+        contact_id: ContactBookEntryId,
     ) -> Result<Self, ContactBookError> {
-        match self.0.remove(contact_id) {
+        self.favorites.remove(&contact_id);
+        match self.contacts.remove(&contact_id) {
             Some(_) => Ok(self),
             None => Err(ContactBookError::CannotRemoveNonexistantContact),
         }
@@ -180,6 +162,15 @@ mod tests {
 
         let contacts = contacts.remove_favorite_contact(&id);
 
+        assert_eq!(contacts, Err(ContactBookError::NoSuchContactInBook));
+    }
+
+    #[test]
+    fn removing_a_nonfavorited_contact_from_favorites_returns_an_error() {
+        let (id, contacts) = ContactBook::new().add_contact(Contact::new("Foo Bar"));
+
+        let contacts = contacts.remove_favorite_contact(&id);
+
         assert_eq!(contacts, Err(ContactBookError::ContactWasNotAFavorite));
     }
 
@@ -188,11 +179,24 @@ mod tests {
         let id = ContactBookEntryId::new();
         let contacts = ContactBook::new();
 
-        let contacts = contacts.remove_contact(&id);
+        let contacts = contacts.remove_contact(id);
 
         assert_eq!(
             contacts,
             Err(ContactBookError::CannotRemoveNonexistantContact)
         );
+    }
+
+    #[test]
+    fn removing_a_contact_from_the_book_removes_the_contact_id_from_the_list_of_favorites() {
+        let (id, contacts) = ContactBook::new().add_contact(Contact::new("Foo Bar"));
+
+        let contacts = contacts.add_favorite_contact(&id).unwrap();
+
+        assert_eq!(contacts.get_favorite_contact_ids(), vec![id]);
+
+        let contacts = contacts.remove_contact(id).unwrap();
+
+        assert_eq!(contacts.get_favorite_contact_ids(), Vec::new())
     }
 }

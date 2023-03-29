@@ -23,7 +23,7 @@ fn contact_book() -> Result<(), ContactBookError> {
 
     assert_eq!(favorite_contacts, Vec::new());
 
-    let contact_book = contact_book.remove_contact(&contact_id)?;
+    let contact_book = contact_book.remove_contact(contact_id.clone())?;
     let queried_contact = contact_book.get_contact(&contact_id);
 
     assert_eq!(queried_contact, Err(ContactBookError::NoSuchContactInBook));
