@@ -1,12 +1,13 @@
-use iced::{Element, Sandbox, Settings};
+use iced::widget::{column, container, text};
+use iced::{Alignment, Element, Length, Sandbox, Settings};
 
 fn main() {
-    Hello::run(Settings::default()).unwrap();
+    ContactsApp::run(Settings::default()).unwrap();
 }
 
-struct Hello;
+struct ContactsApp;
 
-impl Sandbox for Hello {
+impl Sandbox for ContactsApp {
     type Message = ();
 
     fn new() -> Self {
@@ -20,6 +21,14 @@ impl Sandbox for Hello {
     fn update(&mut self, _message: Self::Message) {}
 
     fn view(&self) -> Element<Self::Message> {
-        "Hello, World".into()
+        container(
+            column![text("Hello").size(50)]
+                .padding(20)
+                .align_items(Alignment::Center)
+                .width(Length::Fill),
+        )
+        .width(Length::Fill)
+        .center_x()
+        .into()
     }
 }
